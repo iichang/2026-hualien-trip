@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>花蓮 3 天 2 夜自駕遊互動指南 (07:00 出發最佳化)</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ocean: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Phosphor Icons (SVG Fallback Included) -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .spot-card.active {
+      border-color: #0284c7;
+      background-color: #f0f9ff;
+      box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.15);
+      transform: translateY(-2px);
+    }
+    .sim-car-pulse {
+      animation: carGlow 1.4s ease-in-out infinite alternate;
+    }
+    @keyframes carGlow {
+      from { filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6)); }
+      to { filter: drop-shadow(0 0 16px rgba(239, 68, 68, 1)); }
+    }
+    .map-grid-pattern {
+      background-image: linear-gradient(to right, rgba(226, 232, 240, 0.4) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(226, 232, 240, 0.4) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- 頂部導航區 -->
+  <header class="bg-white/95 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- 標題與出發時間標籤 -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-ocean-600 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-ocean-500/20">
+            <i class="ph-bold ph-steering-wheel text-2xl"></i>
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              花蓮 3 天 2 夜自駕動線
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                07:00 台北出發最佳化範本
+              </span>
+            </h1>
+            <p class="text-xs text-slate-500 hidden sm:block">台北市區 ➔ 蘇花改 ➔ 壽豐 ➔ 吉安 ➔ 花蓮市區 ➔ 新城</p>
+          </div>
+        </div>
+
+        <!-- 頂部操作鈕 -->
+        <div class="flex items-center gap-2">
+          <button onclick="toggleRouteReasonModal(true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold text-ocean-700 bg-ocean-50 hover:bg-ocean-100 rounded-lg transition-colors border border-ocean-200">
+            <i class="ph-bold ph-lightning text-base"></i>
+            <span>順路度檢驗</span>
+          </button>
+          <button onclick="toggleChecklistModal(true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+            <i class="ph-bold ph-check-square-offset text-base"></i>
+            <span class="hidden sm:inline">行前備忘</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 分天標籤列 -->
+      <div class="flex space-x-2 border-t border-slate-100 py-2.5 overflow-x-auto no-scrollbar">
+        <button onclick="selectDayFilter('all')" class="day-tab-btn px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all active bg-ocean-600 text-white shadow-sm" data-day="all">
+          全行程 (全程模擬)
+        </button>
+        <button onclick="selectDayFilter('day1')" class="day-tab-btn px-4 py-1.5 text-xs sm:text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-all" data-day="day1">
+          Day 1 · 07:00 出發 / 海洋公園
+        </button>
+        <button onclick="selectDayFilter('day2')" class="day-tab-btn px-4 py-1.5 text-xs sm:text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-all" data-day="day2">
+          Day 2 · 壽豐往吉安南向北順行
+        </button>
+        <button onclick="selectDayFilter('day3')" class="day-tab-btn px-4 py-1.5 text-xs sm:text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-all" data-day="day3">
+          Day 3 · 七星潭 / 蘇花北返
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主內容容器 -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6">
+    
+    <!-- 左側欄：詳細時程卡片 -->
+    <div class="w-full lg:w-5/12 flex flex-col gap-4 order-2 lg:order-1">
+      
+      <!-- 行車省時指標 -->
+      <div class="bg-gradient-to-r from-slate-900 to-ocean-950 text-white rounded-2xl p-4 shadow-md flex items-center justify-between">
+        <div>
+          <div class="text-xs text-ocean-300 font-semibold flex items-center gap-1.5">
+            <i class="ph-bold ph-shield-check text-emerald-400"></i> 單向順行 · 零折返路徑
+          </div>
+          <div class="text-base sm:text-lg font-bold mt-0.5">
+            全程預估 385 km · 省下 50+ 分鐘
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="inline-block text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            07:00 準時發車
+          </span>
+          <div class="text-[11px] text-slate-300 mt-1">10:00 抵達海洋公園</div>
+        </div>
+      </div>
+
+      <!-- 行程列表 -->
+      <div id="timeline-list" class="space-y-3.5 max-h-[calc(100vh-275px)] overflow-y-auto pr-1 custom-scrollbar">
+        <!-- JS 動態生成 -->
+      </div>
+    </div>
+
+    <!-- 右側欄：高解析原生向量地圖 & 動態模擬控制器 -->
+    <div class="w-full lg:w-7/12 flex flex-col gap-3 order-1 lg:order-2">
+      
+      <!-- 地圖外框容器 (內建高相容 SVG 向量地理系統，100% 免疫 sandbox 跨域阻擋) -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-700 shadow-xl overflow-hidden flex flex-col h-[430px] sm:h-[480px] lg:h-[calc(100vh-275px)] min-h-[440px] relative select-none">
+        
+        <!-- 地圖上方資訊懸浮條 -->
+        <div class="absolute top-3 left-3 z-20 bg-slate-800/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-600/60 flex items-center gap-2 text-xs font-semibold text-slate-200">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span id="map-indicator-text">點擊下方「開始模擬」，觀察自駕路線行駛方向與順序</span>
+        </div>
+
+        <div class="absolute top-3 right-3 z-20 flex gap-2">
+          <button onclick="resetSimulationView()" class="bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-xl border border-slate-600 text-xs font-semibold flex items-center gap-1 transition" title="重置視野">
+            <i class="ph-bold ph-arrows-out"></i>
+            <span class="hidden sm:inline">全景</span>
+          </button>
+        </div>
+
+        <!-- SVG 實時向量地圖視窗 -->
+        <div class="w-full h-full relative overflow-hidden flex items-center justify-center bg-[#0d1627] map-grid-pattern">
+          
+          <svg id="interactive-map-svg" viewBox="0 0 600 800" class="w-full h-full max-h-full transition-transform duration-500" style="filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));">
+            <defs>
+              <!-- 漸層定義 -->
+              <linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0f172a" />
+                <stop offset="100%" stop-color="#075985" />
+              </linearGradient>
+
+              <linearGradient id="routeGradDay1" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" />
+                <stop offset="100%" stop-color="#0284c7" />
+              </linearGradient>
+
+              <linearGradient id="routeGradDay2" x1="0%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stop-color="#34d399" />
+                <stop offset="100%" stop-color="#059669" />
+              </linearGradient>
+
+              <linearGradient id="routeGradDay3" x1="0%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stop-color="#fbbf24" />
+                <stop offset="100%" stop-color="#d97706" />
+              </linearGradient>
+
+              <!-- 箭頭 Marker -->
+              <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#38bdf8" />
+              </marker>
+            </defs>
+
+            <!-- 台灣東北部 & 花東縱谷海岸線地理輪廓底圖 -->
+            <path d="M 230,30 
+                     C 310,40 370,70 380,120
+                     C 390,160 350,210 340,250
+                     C 330,290 325,330 330,380
+                     C 335,420 340,470 340,530
+                     C 340,580 330,640 320,700
+                     C 310,750 300,780 290,790
+                     L 140,790 
+                     C 150,710 170,600 180,480
+                     C 190,380 200,240 190,130
+                     C 185,80 200,40 230,30 Z" 
+                  fill="#1e293b" stroke="#334155" stroke-width="2.5" opacity="0.95" />
+
+            <!-- 地理分區水文/海岸文字 -->
+            <text x="390" y="290" fill="#38bdf8" font-size="12" font-weight="600" opacity="0.45" letter-spacing="4">太平洋 PACIFIC OCEAN</text>
+            <text x="390" y="560" fill="#38bdf8" font-size="12" font-weight="600" opacity="0.45" letter-spacing="4">花東海岸公路台11線</text>
+            <text x="210" y="570" fill="#94a3b8" font-size="11" font-weight="500" opacity="0.35">中央山脈縱谷台9線</text>
+
+            <!-- Day 1 路徑 (台北 -> 壽豐海洋公園 -> 遠雄悅來) -->
+            <path id="svg-route-day1" d="M 270,75 
+                     C 340,110 355,160 345,220 
+                     C 338,270 332,320 335,380 
+                     C 336,410 338,440 336,460
+                     L 333,485" 
+                  fill="none" stroke="#0284c7" stroke-width="5" stroke-dasharray="8,6" stroke-linecap="round" opacity="0.85" />
+
+            <!-- Day 2 路徑 (壽豐 -> 雲山水 -> 貨櫃星巴克 -> 慶修院 -> 將軍府 -> 又一村 -> 福容) -->
+            <path id="svg-route-day2" d="M 333,485
+                     L 295,570
+                     L 330,480
+                     L 300,450
+                     L 326,432
+                     L 315,446
+                     L 335,420" 
+                  fill="none" stroke="#10b981" stroke-width="5" stroke-dasharray="7,5" stroke-linecap="round" opacity="0.85" />
+
+            <!-- Day 3 路徑 (花蓮市 -> 七星潭/原野牧場 -> 台泥DAKA -> 北返台北) -->
+            <path id="svg-route-day3" d="M 335,420
+                     L 338,390
+                     L 339,380
+                     L 345,240
+                     C 345,180 340,120 270,75" 
+                  fill="none" stroke="#f59e0b" stroke-width="5" stroke-dasharray="8,6" stroke-linecap="round" opacity="0.85" />
+
+            <!-- 景點節點群組 (JS 動態置入 SVG 標記) -->
+            <g id="svg-pins-layer"></g>
+
+            <!-- 動態行駛汽車 (隨模擬移動) -->
+            <g id="svg-sim-car" style="display: none; transition: transform 0.08s linear;">
+              <circle r="18" fill="#ef4444" opacity="0.25" class="sim-car-pulse"></circle>
+              <circle r="10" fill="#ef4444" stroke="#ffffff" stroke-width="2.5"></circle>
+              <text text-anchor="middle" dy="3.5" font-size="10" fill="#ffffff" font-weight="bold">🚗</text>
+            </g>
+          </svg>
+
+        </div>
+
+        <!-- 地圖底部控制台：動態模擬器 -->
+        <div class="absolute bottom-3 left-3 right-3 z-20 bg-slate-800/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-700/80 shadow-2xl flex flex-col gap-2">
+          
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span class="font-bold text-slate-100 flex items-center gap-1">
+                <i class="ph-bold ph-gauge text-ocean-400"></i> 行程模擬器
+              </span>
+            </div>
+            <div id="sim-info-badge" class="text-[11px] font-semibold text-ocean-300 truncate max-w-[220px] sm:max-w-[340px]">
+              準備模擬自駕路線...
+            </div>
+          </div>
+
+          <!-- 進度條 -->
+          <div class="w-full bg-slate-700/70 h-1.5 rounded-full overflow-hidden">
+            <div id="sim-progress-bar" class="bg-gradient-to-r from-ocean-500 via-emerald-400 to-amber-400 h-full w-0 transition-all duration-100"></div>
+          </div>
+
+          <!-- 按鈕群 -->
+          <div class="flex items-center justify-between pt-1">
+            <div class="flex items-center gap-2">
+              <button id="btn-toggle-sim" onclick="handleSimulationToggle()" class="px-3 py-1.5 bg-ocean-600 hover:bg-ocean-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+                <i id="btn-toggle-icon" class="ph-fill ph-play"></i>
+                <span id="btn-toggle-text">開始行車模擬</span>
+              </button>
+              <button onclick="handleSimulationReset()" class="px-2.5 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-semibold transition" title="重設模擬">
+                <i class="ph-bold ph-arrow-counter-clockwise"></i>
+              </button>
+            </div>
+
+            <!-- 倍速開關 -->
+            <div class="flex items-center gap-1 text-xs text-slate-400">
+              <span class="text-[11px] hidden sm:inline">速度:</span>
+              <button onclick="setSpeed(1)" class="speed-btn px-2 py-0.5 rounded text-xs font-bold bg-ocean-600 text-white" data-sp="1">1x</button>
+              <button onclick="setSpeed(2)" class="speed-btn px-2 py-0.5 rounded text-xs font-medium text-slate-300 hover:bg-slate-700" data-sp="2">2x</button>
+              <button onclick="setSpeed(4)" class="speed-btn px-2 py-0.5 rounded text-xs font-medium text-slate-300 hover:bg-slate-700" data-sp="4">4x</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- 路線順路與節省時間保證卡片 -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+            <i class="ph-bold ph-clock text-lg"></i>
+          </div>
+          <div>
+            <div class="font-bold text-slate-800">07:00 出發極度關鍵</div>
+            <div class="text-slate-500 text-[11px]">避雪隧首波車流，10:00 準時入園</div>
+          </div>
+        </div>
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+            <i class="ph-bold ph-compass text-lg"></i>
+          </div>
+          <div>
+            <div class="font-bold text-slate-800">Day 2 南向北單行</div>
+            <div class="text-slate-500 text-[11px]">壽豐 ➔ 吉安 ➔ 花蓮市，全程順向</div>
+          </div>
+        </div>
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+            <i class="ph-bold ph-calendar-check text-lg"></i>
+          </div>
+          <div>
+            <div class="font-bold text-slate-800">公休完全規避</div>
+            <div class="text-slate-500 text-[11px]">慶修院(週二有開)、又一村(避週三)</div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+
+  <!-- 順路度分析 Modal -->
+  <div id="modal-route-reason" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i class="ph-bold ph-arrows-merge text-xl"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base">自駕動線順路性與時間節省分析</h3>
+        </div>
+        <button onclick="toggleRouteReasonModal(false)" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="ph-bold ph-x text-xl"></i>
+        </button>
+      </div>
+
+      <div class="py-4 space-y-3.5 text-xs sm:text-sm max-h-[60vh] overflow-y-auto custom-scrollbar">
+        <div class="p-3 bg-ocean-50 rounded-xl border border-ocean-200">
+          <span class="font-bold text-ocean-900 block mb-1">【Day 1：台北直奔壽豐海洋園區】</span>
+          <p class="text-slate-700 leading-relaxed text-xs">
+            07:00 台北市區出發 ➔ 國5雪隧 ➔ 蘇花改快速道路 ➔ 10:00 準時進入花蓮遠雄海洋公園。下午 16:30 閉園後，僅需開車 10 分鐘直上遠雄悅來大飯店登記入住，無任何繞路。
+          </p>
+        </div>
+
+        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+          <span class="font-bold text-emerald-950 block mb-1">【Day 2：從最南端的壽豐，一路向北玩回花蓮市】</span>
+          <p class="text-slate-700 leading-relaxed text-xs">
+            景點完全依地理順序排列：<strong>壽豐雲山水 (最南)</strong> ➔ <strong>吉安貨櫃星巴克 (順向北上)</strong> ➔ <strong>吉安慶修院</strong> ➔ <strong>市區將軍府 1936</strong> ➔ <strong>市區又一村文創園區</strong> ➔ <strong>花蓮福容大飯店</strong>。完全順路，省去至少 50 分鐘以上反覆折返市區的時間與紅綠燈等待。
+          </p>
+        </div>
+
+        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200">
+          <span class="font-bold text-amber-950 block mb-1">【Day 3：新城海岸放鬆，無縫銜接蘇花改北返】</span>
+          <p class="text-slate-700 leading-relaxed text-xs">
+            花蓮福容飯店退房後往北 12 分鐘直達<strong>七星潭與原野牧場</strong>。海景午餐後，13:30 直接接台9線蘇花改北上，停靠<strong>台泥 DAKA 園區</strong>休息加水，隨後一路順暢返回台北市區，不需再進市區塞車。
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 text-right">
+        <button onclick="toggleRouteReasonModal(false)" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800">
+          確認，此規劃極具效率
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 行前確認清單 Modal -->
+  <div id="modal-checklist" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+          <i class="ph-bold ph-check-square-offset text-ocean-600 text-xl"></i>
+          自駕行李與行前清單
+        </h3>
+        <button onclick="toggleChecklistModal(false)" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="ph-bold ph-x text-xl"></i>
+        </button>
+      </div>
+      <div class="py-4 space-y-2.5 text-xs sm:text-sm">
+        <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+          <input type="checkbox" checked class="w-4 h-4 rounded text-ocean-600 focus:ring-ocean-500" />
+          <span>車輛檢查 (五油三水、胎壓、ETC 儲值)</span>
+        </label>
+        <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+          <input type="checkbox" checked class="w-4 h-4 rounded text-ocean-600 focus:ring-ocean-500" />
+          <span>防小黑蚊防蚊液 (壽豐落羽松林與慶修院庭園必備)</span>
+        </label>
+        <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+          <input type="checkbox" class="w-4 h-4 rounded text-ocean-600 focus:ring-ocean-500" />
+          <span>太陽眼鏡、防曬外套 (花蓮海岸紫外線強烈)</span>
+        </label>
+        <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+          <input type="checkbox" class="w-4 h-4 rounded text-ocean-600 focus:ring-ocean-500" />
+          <span>泳裝與泳帽 (遠雄悅來大飯店水療池使用)</span>
+        </label>
+        <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+          <input type="checkbox" class="w-4 h-4 rounded text-ocean-600 focus:ring-ocean-500" />
+          <span>車用手機支架、雙孔快充線</span>
+        </label>
+      </div>
+      <div class="pt-3 border-t border-slate-100 text-right">
+        <button onclick="toggleChecklistModal(false)" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg">
+          完成檢查
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 核心資料與互動邏輯 -->
+  <script>
+    // 景點資料庫 (包含 SVG 地圖對應座標 svgX, svgY) - 開源通用範本版
+    const tripSpots = [
+      // Day 1
+      {
+        id: "d1-start",
+        day: 1,
+        title: "台北出發點 (如：台北車站 / 台北市區)",
+        category: "台北市區 · 07:00 準時發車",
+        time: "07:00 出發",
+        stay: "出發整備",
+        svgX: 270,
+        svgY: 75,
+        address: "台北市中正區北平西路3號 (可自訂為出發點)",
+        tel: "無",
+        driveToNext: "往壽豐遠雄海洋公園約 165 km / 車程 3 小時 (經國5、蘇花改)",
+        notes: "07:00 出發能避開國道 5 號尖峰車潮，一路暢通經蘇花改直達花蓮壽豐海岸。",
+        trafficTip: "中途可於蘇澳服務區短暫停留 10 分鐘，精神充沛開往花蓮。"
+      },
+      {
+        id: "d1-oceanpark",
+        day: 1,
+        title: "花蓮遠雄海洋公園",
+        category: "壽豐鄉 · 海岸遊樂園 & 晴空纜車",
+        time: "10:00 - 16:30",
+        stay: "約 6.5 小時 (完整暢玩)",
+        svgX: 336,
+        svgY: 460,
+        address: "花蓮縣壽豐鄉189號",
+        tel: "03-8123-199",
+        driveToNext: "開車上山至遠雄悅來大飯店僅 4.5 km / 約 10 分鐘",
+        notes: "剛好 10:00 開園抵達！欣賞海豚、海獅表演與水晶城堡劇場，在園區眺望太平洋美景。",
+        trafficTip: "設有大型專用停車場，離場後順嶺而上直奔飯店，免去任何市區塞車。"
+      },
+      {
+        id: "d1-farglory-hotel",
+        day: 1,
+        title: "花蓮遠雄悅來大飯店",
+        category: "壽豐鄉 · 五星級海景度假飯店 (Day 1 住宿)",
+        time: "17:00 登記入住",
+        stay: "夜宿 (依專案早晚餐規劃)",
+        svgX: 333,
+        svgY: 485,
+        address: "花蓮縣壽豐鄉山嶺18號",
+        tel: "03-8123-999",
+        driveToNext: "次日前往雲山水夢幻湖約 17 km / 約 25 分鐘",
+        notes: "佇立於海拔 220 公尺的山巔，坐擁壯麗太平洋與花東縱谷夜景，享用自助百匯與溫水水療池。（費用請參考飯店官網或訂房專案）",
+        trafficTip: "山路路況良好且設有路燈，夜間行車維持速限慢行。"
+      },
+
+      // Day 2 (南向北順行)
+      {
+        id: "d2-yunshanshui",
+        day: 2,
+        title: "雲山水夢幻湖",
+        category: "壽豐鄉 · 絕美落羽松湖畔跳石",
+        time: "10:00 - 11:30",
+        stay: "約 1.5 小時",
+        svgX: 295,
+        svgY: 570,
+        address: "花蓮縣壽豐鄉豐坪路2段2巷201弄18號",
+        tel: "0968-799-780",
+        driveToNext: "沿台11丙一路北上至貨櫃星巴克約 18 km / 約 25 分鐘",
+        notes: "24 公頃夢幻莊園，湖水宛如明鏡倒映落羽松森林，漫步水上跳石步道隨手拍出明信片美照。",
+        trafficTip: "林蔭茂密處小黑蚊較多，入園前務必噴塗長效防蚊液。"
+      },
+      {
+        id: "d2-starbucks-container",
+        day: 2,
+        title: "貨櫃星巴克 (洄瀾門市) & 新天堂樂園",
+        category: "吉安鄉 · 隈研吾建築美學 & 輕食午餐",
+        time: "12:00 - 13:30",
+        stay: "約 1.5 小時",
+        svgX: 330,
+        svgY: 480,
+        address: "花蓮縣吉安鄉南濱路一段505號",
+        tel: "03-8420-014",
+        driveToNext: "往西北方向至吉安慶修院約 6.5 km / 約 15 分鐘",
+        notes: "純白貨櫃交疊造型的世界級打卡點，內裝有舒適座席，可在此悠閒享用午餐咖啡與逛街。",
+        trafficTip: "備有寬廣的免費平面停車場，進出十分便利順暢。"
+      },
+      {
+        id: "d2-qingxiuyuan",
+        day: 2,
+        title: "吉安慶修院",
+        category: "吉安鄉 · 百年國家三級古蹟日式寺院",
+        time: "14:00 - 15:30",
+        stay: "約 1.5 小時",
+        svgX: 300,
+        svgY: 450,
+        address: "花蓮縣吉安鄉中興路345-1號",
+        tel: "03-8535-479",
+        driveToNext: "沿中央路接中正路往花蓮市區將軍府約 7 km / 約 15 分鐘",
+        notes: "建於 1917 年的江戶風真言宗佛寺，有手水舍、不動明王石刻與百度石，週二正常開放 (建議避開週一公休日)。",
+        trafficTip: "鄰近有規劃完善的收費停車場，周遭住宅區巷弄請慢速禮讓行人。"
+      },
+      {
+        id: "d2-general-hall",
+        day: 2,
+        title: "花蓮將軍府 1936 園區",
+        category: "花蓮市區 · 美崙溪畔日式木造聚落",
+        time: "16:00 - 18:00",
+        stay: "約 2 小時",
+        svgX: 326,
+        svgY: 432,
+        address: "花蓮縣花蓮市中正路622巷6號",
+        tel: "03-8316-272",
+        driveToNext: "往市區仁愛街又一村僅 1.5 km / 約 8 分鐘",
+        notes: "全新整修開放的歷史聚落，匯聚 16 家特色餐廳、甜點名店與伴手禮，黃昏燈火亮起極具京都氛圍。",
+        trafficTip: "車輛可停放在憲兵隊旁或美崙溪畔停車格，步行過橋即達。"
+      },
+      {
+        id: "d2-youyicun",
+        day: 2,
+        title: "又一村文創園區",
+        category: "花蓮市區 · 老眷村慢調聚落 & 晚餐時光",
+        time: "18:30 - 20:00",
+        stay: "約 1.5 小時",
+        svgX: 315,
+        svgY: 446,
+        address: "花蓮縣花蓮市仁愛街104巷6號",
+        tel: "各店鋪公告為主",
+        driveToNext: "前往花蓮福容大飯店約 4.5 km / 約 10 分鐘",
+        notes: "公賣局舊眷舍翻新的老屋文創基地，推薦特色牛肉麵與文創甜品（週三公休，行程安排週二最合適）。",
+        trafficTip: "建議停於自由街停車場，穿過林森路漫步進入巷內。"
+      },
+      {
+        id: "d2-fullon-hotel",
+        day: 2,
+        title: "花蓮福容大飯店",
+        category: "花蓮市區 · 太平洋港景星級飯店 (Day 2 住宿)",
+        time: "20:30 入住辦理",
+        stay: "夜宿 (依訂購方案享用設施)",
+        svgX: 335,
+        svgY: 420,
+        address: "花蓮縣花蓮市民生路51號",
+        tel: "03-8239-988",
+        driveToNext: "次日往七星潭風景區約 6 km / 僅 12 分鐘車程",
+        notes: "鄰近花蓮港與美崙田徑場，清晨可在房內欣賞太平洋日出晨曦，隔日直接往北新城鄉前進超順路。（費用依實際預訂專案為準）",
+        trafficTip: "飯店附設地下平面住客停車場，直達電梯非常方便。"
+      },
+
+      // Day 3 (一路北返)
+      {
+        id: "d3-qixingtan",
+        day: 3,
+        title: "七星潭風景區",
+        category: "新城鄉 · 月牙灣蔚藍海岸礫石灘",
+        time: "10:00 - 11:30",
+        stay: "約 1.5 小時",
+        svgX: 338,
+        svgY: 390,
+        address: "花蓮縣新城鄉七星街79巷5號",
+        tel: "03-8221-121",
+        driveToNext: "至原野牧場僅 300 公尺 / 車程 2 分鐘 (步行亦可)",
+        notes: "聽著海浪輕拂鵝卵石的沙沙聲，遠眺清水斷崖壯景。相傳疊上 7 顆鵝卵石能祈願感情長長久久。",
+        trafficTip: "海灘屬於陡降斷層海溝地形，浪大危險，請在礫石灘拍照，切勿下水戲水！"
+      },
+      {
+        id: "d3-yuanye",
+        day: 3,
+        title: "原野牧場",
+        category: "新城鄉 · 臨海懸崖咖啡館 & 海景午餐",
+        time: "11:40 - 13:30",
+        stay: "約 2 小時",
+        svgX: 339,
+        svgY: 380,
+        address: "花蓮縣新城鄉七星街9號",
+        tel: "03-8226-035",
+        driveToNext: "直接銜接蘇花改一路北上至台泥 DAKA 約 40 km / 約 50 分鐘",
+        notes: "大片面海落地窗引進一望無際的蔚藍太平洋，必點經典特調羊奶咖啡與義法手工精緻午餐。",
+        trafficTip: "附專用停車場，窗景座位熱門，建議提早入座。"
+      },
+      {
+        id: "d3-daka",
+        day: 3,
+        title: "台泥 DAKA 園區",
+        category: "秀林鄉和平 · 蘇花改特色水舞生態休息站",
+        time: "14:30 - 15:30",
+        stay: "約 1 小時",
+        svgX: 345,
+        svgY: 240,
+        address: "花蓮縣秀林鄉和平263號",
+        tel: "03-8681-412",
+        driveToNext: "銜接蘇花改與國5雪隧回台北約 125 km / 車程約 2.5 小時",
+        notes: "清水模造型星巴克、水舞噴泉廣場與綠能太陽能花，北返蘇花改前最棒的洗手間與提神補給點。",
+        trafficTip: "附設超大免費停車場與中油加油站，建議在此補滿油箱後再上路。"
+      },
+      {
+        id: "d3-end",
+        day: 3,
+        title: "台北出發點 (平安賦歸)",
+        category: "台北市區 · 圓滿返抵",
+        time: "18:00 - 18:30",
+        stay: "旅程圓滿",
+        svgX: 270,
+        svgY: 75,
+        address: "台北市中正區北平西路3號 (可自訂為返程點)",
+        tel: "無",
+        driveToNext: "旅途愉快完成！",
+        notes: "避開收假車潮，傍晚 18:00 順利返回台北，享受滿滿的花蓮山海回憶！",
+        trafficTip: "傍晚雪隧北上車流相對順暢，依速限平穩駕駛。"
+      }
+    ];
+
+    const dayColorMap = {
+      1: '#0284c7', // Ocean Blue
+      2: '#10b981', // Emerald
+      3: '#f59e0b'  // Amber
+    };
+
+    let activeFilter = 'all';
+    let isSimulating = false;
+    let simIndex = 0;
+    let simProgress = 0;
+    let simAnimId = null;
+    let simSpeedMultiplier = 1;
+
+    // 取得當前篩選之景點陣列
+    function getSpots() {
+      return activeFilter === 'all' 
+        ? tripSpots 
+        : tripSpots.filter(s => `day${s.day}` === activeFilter);
+    }
+
+    // 渲染 SVG 地圖節點
+    function renderSvgPins() {
+      const pinsLayer = document.getElementById('svg-pins-layer');
+      pinsLayer.innerHTML = '';
+
+      const spots = getSpots();
+
+      // 同步更新軌跡線顯示狀態
+      document.getElementById('svg-route-day1').style.display = (activeFilter === 'all' || activeFilter === 'day1') ? 'block' : 'none';
+      document.getElementById('svg-route-day2').style.display = (activeFilter === 'all' || activeFilter === 'day2') ? 'block' : 'none';
+      document.getElementById('svg-route-day3').style.display = (activeFilter === 'all' || activeFilter === 'day3') ? 'block' : 'none';
+
+      spots.forEach((spot, idx) => {
+        const color = dayColorMap[spot.day];
+        const isStartOrEnd = spot.id.includes('start') || spot.id.includes('end');
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'cursor-pointer transition-transform duration-200 hover:scale-125');
+        g.setAttribute('id', `svg-pin-${spot.id}`);
+        g.onclick = () => focusTimelineItem(spot.id);
+
+        g.innerHTML = `
+          <!-- 外光圈 -->
+          <circle cx="${spot.svgX}" cy="${spot.svgY}" r="14" fill="${color}" opacity="0.25" />
+          <!-- 主節點 -->
+          <circle cx="${spot.svgX}" cy="${spot.svgY}" r="8.5" fill="${color}" stroke="#ffffff" stroke-width="2" />
+          <!-- 節點序號或符號號碼 -->
+          <text x="${spot.svgX}" y="${spot.svgY + 3.5}" text-anchor="middle" font-size="8" font-weight="bold" fill="#ffffff">
+            ${isStartOrEnd ? '★' : idx + 1}
+          </text>
+          <!-- 懸浮文字標籤 -->
+          <text x="${spot.svgX + 14}" y="${spot.svgY + 4}" font-size="10" font-weight="700" fill="#f8fafc" stroke="#0f172a" stroke-width="2" paint-order="stroke fill">
+            ${spot.title}
+          </text>
+        `;
+        pinsLayer.appendChild(g);
+      });
+    }
+
+    // 渲染左側時間軸卡片
+    function renderTimelineList() {
+      const container = document.getElementById('timeline-list');
+      container.innerHTML = '';
+      const spots = getSpots();
+
+      spots.forEach((spot, index) => {
+        const color = dayColorMap[spot.day];
+        const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(spot.address || spot.title)}`;
+
+        const card = document.createElement('div');
+        card.id = `card-${spot.id}`;
+        card.className = "spot-card bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 shadow-sm hover:border-ocean-300 transition-all cursor-pointer relative group";
+        card.onclick = (e) => {
+          if (!e.target.closest('a') && !e.target.closest('input')) {
+            focusTimelineItem(spot.id);
+          }
+        };
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full text-white" style="background-color: ${color}">
+                Day ${spot.day}
+              </span>
+              <span class="text-xs font-bold text-slate-700 flex items-center gap-1">
+                <i class="ph-bold ph-clock"></i> ${spot.time}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                ${spot.stay}
+              </span>
+              <input type="checkbox" title="標記已打卡" class="w-4 h-4 rounded text-ocean-600 focus:ring-ocean-500 cursor-pointer" />
+            </div>
+          </div>
+
+          <div class="mt-2">
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 group-hover:text-ocean-600 transition-colors flex items-center justify-between">
+              <span>${index + 1}. ${spot.title}</span>
+              <i class="ph-bold ph-arrow-up-right text-xs opacity-0 group-hover:opacity-100 transition-opacity text-ocean-600"></i>
+            </h3>
+            <p class="text-xs font-medium text-ocean-600 mt-0.5">${spot.category}</p>
+          </div>
+
+          <p class="text-xs text-slate-600 mt-2 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            ${spot.notes}
+          </p>
+
+          <div class="mt-2.5 space-y-1.5 text-[11px]">
+            <div class="flex items-start gap-1.5 text-slate-700 font-medium">
+              <i class="ph-bold ph-steering-wheel text-ocean-600 text-sm shrink-0 mt-0.5"></i>
+              <span>${spot.driveToNext}</span>
+            </div>
+            ${spot.trafficTip ? `
+              <div class="flex items-start gap-1.5 text-amber-800 bg-amber-50/80 p-2 rounded-lg border border-amber-200/60">
+                <i class="ph-bold ph-warning-circle text-amber-600 text-sm shrink-0 mt-0.5"></i>
+                <span class="leading-normal">${spot.trafficTip}</span>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <div class="truncate max-w-[210px]" title="${spot.address}">
+              <i class="ph-bold ph-map-pin"></i> ${spot.address}
+            </div>
+            <a href="${navUrl}" target="_blank" class="shrink-0 inline-flex items-center gap-1 text-ocean-600 hover:text-ocean-700 font-bold bg-ocean-50 hover:bg-ocean-100 px-2.5 py-1 rounded-lg transition-colors">
+              <i class="ph-bold ph-navigation-arrow"></i> Google 導航
+            </a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 聚焦卡片與節點
+    function focusTimelineItem(id) {
+      document.querySelectorAll('.spot-card').forEach(c => c.classList.remove('active'));
+      const targetCard = document.getElementById(`card-${id}`);
+      if (targetCard) {
+        targetCard.classList.add('active');
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      const spot = tripSpots.find(s => s.id === id);
+      if (spot) {
+        document.getElementById('map-indicator-text').innerText = `已聚焦：${spot.title} (${spot.time})`;
+        // 將模擬車輛移至該點
+        const car = document.getElementById('svg-sim-car');
+        car.style.display = 'block';
+        car.setAttribute('transform', `translate(${spot.svgX}, ${spot.svgY})`);
+      }
+    }
+
+    // 切換分天篩選
+    function selectDayFilter(dayKey) {
+      activeFilter = dayKey;
+
+      document.querySelectorAll('.day-tab-btn').forEach(btn => {
+        if (btn.getAttribute('data-day') === dayKey) {
+          btn.className = "day-tab-btn px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all active bg-ocean-600 text-white shadow-sm";
+        } else {
+          btn.className = "day-tab-btn px-4 py-1.5 text-xs sm:text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-all";
+        }
+      });
+
+      handleSimulationReset();
+      renderTimelineList();
+      renderSvgPins();
+    }
+
+    // ------------------------------------------------------------------
+    // 自駕路線動態模擬引擎 (Vector Route Simulation)
+    // ------------------------------------------------------------------
+    function handleSimulationToggle() {
+      if (isSimulating) {
+        pauseSimulation();
+      } else {
+        startSimulation();
+      }
+    }
+
+    function startSimulation() {
+      const spots = getSpots();
+      if (spots.length < 2) return;
+
+      isSimulating = true;
+      document.getElementById('btn-toggle-icon').className = "ph-fill ph-pause";
+      document.getElementById('btn-toggle-text').innerText = "暫停模擬";
+      document.getElementById('map-indicator-text').innerText = "行車順序模擬中...";
+
+      const car = document.getElementById('svg-sim-car');
+      car.style.display = 'block';
+
+      animateStep();
+    }
+
+    function pauseSimulation() {
+      isSimulating = false;
+      if (simAnimId) cancelAnimationFrame(simAnimId);
+      document.getElementById('btn-toggle-icon').className = "ph-fill ph-play";
+      document.getElementById('btn-toggle-text').innerText = "繼續模擬";
+      document.getElementById('map-indicator-text').innerText = "模擬已暫停";
+    }
+
+    function handleSimulationReset() {
+      pauseSimulation();
+      simIndex = 0;
+      simProgress = 0;
+      document.getElementById('btn-toggle-text').innerText = "開始行車模擬";
+      document.getElementById('sim-info-badge').innerText = "準備模擬自駕路線...";
+      document.getElementById('sim-progress-bar').style.width = "0%";
+      document.getElementById('svg-sim-car').style.display = 'none';
+      document.getElementById('map-indicator-text').innerText = "點擊「開始模擬」觀察自駕路線行駛方向";
+    }
+
+    function setSpeed(speed) {
+      simSpeedMultiplier = speed;
+      document.querySelectorAll('.speed-btn').forEach(btn => {
+        if (Number(btn.getAttribute('data-sp')) === speed) {
+          btn.className = "speed-btn px-2 py-0.5 rounded text-xs font-bold bg-ocean-600 text-white";
+        } else {
+          btn.className = "speed-btn px-2 py-0.5 rounded text-xs font-medium text-slate-300 hover:bg-slate-700";
+        }
+      });
+    }
+
+    function animateStep() {
+      if (!isSimulating) return;
+
+      const spots = getSpots();
+      if (simIndex >= spots.length - 1) {
+        document.getElementById('sim-info-badge').innerHTML = "<span class='text-emerald-400 font-bold'>✓ 路線模擬完成！全程順路零折返！</span>";
+        document.getElementById('sim-progress-bar').style.width = "100%";
+        pauseSimulation();
+        return;
+      }
+
+      const p1 = spots[simIndex];
+      const p2 = spots[simIndex + 1];
+
+      document.getElementById('sim-info-badge').innerHTML = `
+        <span class="text-white font-bold">${p1.title}</span> ➔ <span class="text-ocean-300 font-bold">${p2.title}</span>
+      `;
+
+      focusTimelineItem(p2.id);
+
+      // 進度累加 (速度乘數)
+      simProgress += 0.009 * simSpeedMultiplier;
+
+      const totalSegments = spots.length - 1;
+      const overallPercent = ((simIndex + simProgress) / totalSegments) * 100;
+      document.getElementById('sim-progress-bar').style.width = `${Math.min(overallPercent, 100)}%`;
+
+      if (simProgress >= 1) {
+        simProgress = 0;
+        simIndex++;
+      }
+
+      // 線性差值運算
+      const currentX = p1.svgX + (p2.svgX - p1.svgX) * simProgress;
+      const currentY = p1.svgY + (p2.svgY - p1.svgY) * simProgress;
+
+      const car = document.getElementById('svg-sim-car');
+      car.setAttribute('transform', `translate(${currentX}, ${currentY})`);
+
+      simAnimId = requestAnimationFrame(animateStep);
+    }
+
+    function resetSimulationView() {
+      const svg = document.getElementById('interactive-map-svg');
+      svg.style.transform = 'scale(1)';
+      document.getElementById('map-indicator-text').innerText = '已恢復全景視角';
+    }
+
+    function toggleRouteReasonModal(show) {
+      const modal = document.getElementById('modal-route-reason');
+      if (show) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function toggleChecklistModal(show) {
+      const modal = document.getElementById('modal-checklist');
+      if (show) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    // 初始化頁面
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTimelineList();
+      renderSvgPins();
+    });
+  </script>
+</body>
+</html>
